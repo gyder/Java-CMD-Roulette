@@ -8,6 +8,8 @@ class Main {
     for (int i = 0; i < 10; i++) {
       IO.println(board.randomField());
     }
+    var set = IO.readln(">");
+    
   }
 
   public static void cls() throws Exception {
@@ -31,6 +33,21 @@ record Board(List<Field> fields) {
   Field randomField() {
     var roll = (int) (Math.random() * fields.size());
     return fields.get(roll);
+  }
+}
+
+enum Guess {
+  STRAIGHT,
+  SPLIT;
+  static Guess of(String input) {
+    switch (input) {
+      case "straight", "s", "1", "one":
+        return STRAIGHT;
+      case "split", "double", "2", "two":
+        return SPLIT;
+      default:
+        return STRAIGHT;
+    }
   }
 }
 
