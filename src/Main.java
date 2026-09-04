@@ -2,6 +2,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+// https://askubuntu.com/questions/558280/changing-colour-of-text-and-background-of-terminal
+// about changing the for- and background color of the terminal through commands
+
 class Main {
   static void main() {
     Board board = new Board();
@@ -13,7 +16,7 @@ class Main {
 
     mainloop:
     while (true) {
-      String[] cmd = IO.readln("----->").split(" ");
+      String[] cmd = IO.readln("\n----->").split(" ");
       switch (cmd[0]) {
         case "add" -> {
           var guess = IO.readln("guess>");
@@ -25,11 +28,12 @@ class Main {
           IO.println("coins = " + coins);
           for (int i = 0; i < activePlays.size(); i++) {
             var play = activePlays.get(i);
-            IO.println("#" + i+1 + ": " + toHumanReadable(play));
+            IO.println("#" + (i+1) + ": " + toHumanReadable(play));
           }
         }
         case "rem" -> {
-          int index = Integer.parseInt(cmd[1]);
+          int index = Integer.parseInt(cmd[1]) - 1;
+          IO.println("Removing bet N." + (index + 1));
           activePlays.remove(index);
         }
         case "roll", "r" -> {
@@ -60,14 +64,14 @@ class Main {
   static void helpBoard() {
     IO.println(
 """
- 01 | 02 |{03} <- SINGLE
-{04}| 05 | 06  <- SPLIT V
+ 01 | 02 |<03> <- SINGLE
+<04>| 05 | 06  <- SPLIT V
 (07)| 08 | 09
- 10 |{11}|(12) <- SPLIT H
+ 10 |<11>|(12) <- SPLIT H
  13 | 14 | 15
-{16}|(17)|(18) <- STREET
+<16>|(17)|(18) <- STREET
  19 | 20 | 21
-{22}|(23)| 24  <- CORNER
+<22>|(23)| 24  <- CORNER
 (25)|(26)| 27
  28 | 29 | 30
  25 | 26 | 33
@@ -166,7 +170,7 @@ class Main {
     switch (play.guess()) {
       case Guess.Single single -> builder.append(" on ").append(single.value());
       case Guess.Split split -> builder.append(" split between ").append(split.lower()).append(" and ").append(split.lower() + 1);
-      case Guess.Street street -> builder.append(" in a street from ").append(street.highest()-2).append(" to ").append(street.highest());
+      case Guess.Street street -> builder.append(" on a street from ").append(street.highest()-2).append(" to ").append(street.highest());
       case Guess.Preset.RED -> builder.append(" on ").append("red");
       case Guess.Preset.BLACK -> builder.append(" on ").append("black");
       case Guess.Preset.COL1 -> builder.append(" on ").append("the first column");
@@ -215,17 +219,14 @@ sealed interface Guess {
   }
 
   static Guess of(String input) {
-    var trim6 = Integer.parseInt(input.substring(6).trim());
-    var trim5 = Integer.parseInt(input.substring(5).trim());
-
     if (input.startsWith("single")) {
-      return new Single(trim6);
+      return new Single(Integer.parseInt(input.substring(6).trim()));
     }
     if (input.startsWith("split")) {
-      return new Split(trim5);
+      return new Split(Integer.parseInt(input.substring(5).trim()));
     }
     if (input.startsWith("street")) {
-      return new Street(trim6);
+      return new Street(Integer.parseInt(input.substring(6).trim()));
     }
     return Preset.valueOf(input.toUpperCase(Locale.ROOT));
   }
