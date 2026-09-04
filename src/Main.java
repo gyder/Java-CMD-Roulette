@@ -64,18 +64,18 @@ class Main {
   static void helpBoard() {
     IO.println(
 """
- 01 | 02 |<03> <- SINGLE
-<04>| 05 | 06  <- SPLIT V
+ 01 | 02 |<03> <- SINGLE 3
+<04>| 05 | 06  <- SPLIT-V 4
 (07)| 08 | 09
- 10 |<11>|(12) <- SPLIT H
+ 10 |<11>|(12) <- SPLIT-H 11
  13 | 14 | 15
-<16>|(17)|(18) <- STREET
+<16>|(17)|(18) <- STREET 16
  19 | 20 | 21
-<22>|(23)| 24  <- CORNER
+<22>|(23)| 24  <- CORNER 22
 (25)|(26)| 27
  28 | 29 | 30
- 25 | 26 | 33
- 25 | 26 | 36
+<25>|(26)|(33) <- ....
+(25)|(26)|(36)
 """);
   }
 
@@ -131,11 +131,7 @@ class Main {
     return switch (play.guess()) {
       case Guess.Single single -> single.value() == value ? win : loss;
 
-      case Guess.Split split -> {
-        int lo = split.lower();
-        int hi = lo + 1;
-        yield lo == value || hi == value ? win : loss;
-      }
+      case Guess.Split split -> split.lo() == value || split.hi() == value ? win : loss;
 
       case Guess.Street street -> {
         int lo = street.highest() - 2;
@@ -169,7 +165,7 @@ class Main {
     builder.append("Bet ").append(play.bet());
     switch (play.guess()) {
       case Guess.Single single -> builder.append(" on ").append(single.value());
-      case Guess.Split split -> builder.append(" split between ").append(split.lower()).append(" and ").append(split.lower() + 1);
+      case Guess.Split split -> builder.append(" split between ").append(split.lo()).append(" and ").append(split.hi());
       case Guess.Street street -> builder.append(" on a street from ").append(street.highest()-2).append(" to ").append(street.highest());
       case Guess.Preset.RED -> builder.append(" on ").append("red");
       case Guess.Preset.BLACK -> builder.append(" on ").append("black");
@@ -204,7 +200,15 @@ sealed interface Guess {
   // any SINGLE number
   record Single(int value) implements Guess {}
   // ANY pair of 2 Numbers that are adjacent either vertically or horizontally
-  record Split(int lower) implements Guess {}
+  record Split(int lo, int hi) implements Guess {
+    public Split {
+      if (lo <= 0 || lo > 35) throw new IllegalArgumentException();
+      if (hi <= 1 || hi > 36) throw new IllegalArgumentException();
+      if ((hi - lo) != 3) {
+        if ((hi - lo) != 1) throw new IllegalArgumentException();
+      }
+    }
+  }
   // 3 numbers that end on a multiple of 3
   record Street(int highest) implements Guess {}
   // line 1x3
@@ -223,7 +227,8 @@ sealed interface Guess {
       return new Single(Integer.parseInt(input.substring(6).trim()));
     }
     if (input.startsWith("split")) {
-      return new Split(Integer.parseInt(input.substring(5).trim()));
+      var array = input.substring(5).trim().split(" ");
+      return new Split(Integer.parseInt(array[0]), Integer.parseInt(array[1]));
     }
     if (input.startsWith("street")) {
       return new Street(Integer.parseInt(input.substring(6).trim()));
