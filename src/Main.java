@@ -3,7 +3,7 @@ import java.util.List;
 import java.util.Locale;
 
 // https://askubuntu.com/questions/558280/changing-colour-of-text-and-background-of-terminal
-// about changing the for- and background color of the terminal through commands
+// about changing the fore- and background color of the terminal through commands
 
 class Main {
   static void main() {
